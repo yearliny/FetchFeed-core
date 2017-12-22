@@ -1,0 +1,142 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>FetchFeed - {% block title %}Fetch Feed for free{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'fetchfeed/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'fetchfeed/css/style.css' %}">
+</head>
+<body>
+    <header>
+        <!-- Fixed navbar -->
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top">
+            <a class="navbar-brand" href="#">
+                <img src="{% static 'fetchfeed/images/logo.png' %}" width="30" height="30" class="d-inline-block align-top"
+                     alt="">
+                FetchFeed
+            </a>
+            <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+                    aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Recently</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Hotest</a>
+                    </li>
+                </ul>
+                <button class="btn btn-outline-light float-lg-right" type="submit">Log In</button>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h3>Edit Feed : New Feed</h3>
+                <p class="text-muted">
+                    Edit your feed. Required fields are marked with asterisk (*).
+                </p>
+                <p class="text-muted">
+                    Click on “[?]” links to see help on corresponding features (in popup window).
+                </p>
+                <p class="text-muted">
+                    You do not need to “save” your feed: parameters are saved on server automatically bit by bit each time
+                    you press [Reload], [Extract] and [Preview] buttons (see below). Once you setup all the parameters, you
+                    will be provided a link to your feed.
+                </p>
+            </div>
+        </div>
+        <div class="contain-fluid">
+            <div class="row">
+                <div class="col">
+                    <div id="accordion" role="tablist">
+                        <div class="card">
+                            <div class="card-header" role="tab" id="step1">
+                                <h5 class="mb-0">
+                                    <a data-toggle="collapse" href="#collapseOne" aria-expanded="true"
+                                       aria-controls="collapseOne">
+                                        Step 1
+                                    </a>
+                                </h5>
+                            </div>
+                            <div id="collapseOne" class="collapse show" role="tabpanel" aria-labelledby="step1"
+                                 data-parent="#accordion">
+                                <div class="card-body">
+                                    <form action="">
+                                        <div class="input-group">
+                                            <input type="text" id="address" class="form-control"
+                                                   placeholder="https://www.example.com">
+                                            <span class="input-group-btn">
+                                                    <button class="btn btn-primary" type="button">Reload</button>
+                                                </span>
+                                        </div>
+                                        <div class="highlight border border-light">
+                                                <pre>
+                                                    <code>this is code</code>
+                                                </pre>
+                                        </div>
+                                        <div class="form-group">
+                                            <lable for="item-pattern">Item pattern</lable>
+                                            <textarea type="text" id="item-pattern" class="form-control"></textarea>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" role="tab" id="step2">
+                                <h5 class="mb-0">
+                                    <a href="" class="collapsed"></a>
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--<div class="row">
+            <div class="col">
+                <form action="">
+                    <div class="input-group">
+                        <input type="text" id="address" class="form-control" placeholder="https://www.example.com">
+                        <span class="input-group-btn">
+                            <button class="btn btn-primary" type="button">Reload</button>
+                        </span>
+                    </div>
+                    <div class="highlight border border-light">
+                        <pre>
+                            <code>this is code</code>
+                        </pre>
+                    </div>
+                    <div class="form-group">
+                        <lable for="item-pattern">Item pattern</lable>
+                        <textarea type="text" id="item-pattern" class="form-control"></textarea>
+                    </div>
+
+                </form>
+            </div>
+
+        </div>-->
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <span class="text-muted">FetchFeed Copyright © 2017. All rights reserved. </span>
+        </div>
+    </footer>
+    <script src="{% static 'fetchfeed/js/jquery.min.js' %}"></script>
+    <script src="{% static 'fetchfeed/js/popper.min.js' %}"></script>
+    <script src="{% static 'fetchfeed/js/bootstrap.min.js' %}"></script>
+</body>
+</html>
