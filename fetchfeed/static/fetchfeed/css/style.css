@@ -1,3 +1,6 @@
+pre {
+    max-height: 400px;
+}
 .bg-orange {
     background-color: #E65100;
 }

@@ -1,6 +1,7 @@
 # -*- coding:utf-8 -*-
 import os
 import re
+import sys
 import time
 import hashlib
 import requests
@@ -29,7 +30,7 @@ class GetPage:
             url_hash = url_hash[i:]
         else:
             path_list.append(url_hash)
-        file_path = os.path.join(os.path.abspath('.'), self.cache_path, *path_list)
+        file_path = os.path.join(sys.path[0], self.cache_path, *path_list)
         return file_path
 
     def get_html(self):

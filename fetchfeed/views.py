@@ -9,9 +9,10 @@ def index(request):
 
 def api(request, meth):
     if meth == 'get':
-        page_html = prc.GetPage('https://yuan.ga').read()
+        url = request.GET.get('url')
+        page_html = prc.GetPage(url).read()
         response = {
-            'page-html': page_html
+            'page_html': page_html
         }
     return JsonResponse(response)
 
