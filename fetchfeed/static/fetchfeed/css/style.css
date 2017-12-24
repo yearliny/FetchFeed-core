@@ -1,51 +1,31 @@
-html {
-  position: relative;
-  min-height: 100%;
+.bg-orange {
+    background-color: #E65100;
 }
-
-body {
-  /* Margin bottom by footer height */
-  margin-bottom: 60px;
+.bg-orange-light {
+    background-color: #EF6C00;
 }
-
-body > .container {
-  padding: 60px 15px 0;
+.text-orange {
+    color: #E65100 !important;
 }
-
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  /* Set the fixed height of the footer here */
-  height: 60px;
-  line-height: 60px; /* Vertically center the text there */
-  background-color: #f5f5f5;
-}
-/*悬浮 link 中样式*/
-.navbar-dark .navbar-nav .nav-link:focus, .navbar-dark .navbar-nav .nav-link:hover {
-    color: #f7f7f9;
-}
-/*navbar 背景色*/
-nav.navbar.navbar-expand-md.navbar-dark.fixed-top {
-    background-color: #FF6600
-}
-/*Brand font*/
-.navbar-dark .navbar-brand {
-    font-weight: bold;
-    font-size: 1.3em;
-}
-
-.highlight pre {
-    padding: 0;
-    margin-top: 0;
-    margin-bottom: 0;
+.btn-outline-orange {
+    color: #E65100;
     background-color: transparent;
-    border: 0;
+    background-image: none;
+    border-color: #E65100;
+  }
+
+.btn-outline-orange:hover {
+    color: #fff;
+    background-color: #E65100;
+    border-color: #E65100;
 }
-pre {
-    display: block;
-    margin-top: 0;
-    margin-bottom: 1rem;
-    font-size: 90%;
-    color: #212529;
+
+html {
+    position: relative;
+    min-height: 100%;
+  }
+body {
+    font-family: "Lucida Grande",Lucida Sans Unicode, Hiragino Sans GB, WenQuanYi Micro Hei, Verdana, Aril, sans-serif;
 }
+.navbar ul li a {
+    color:#fff;}

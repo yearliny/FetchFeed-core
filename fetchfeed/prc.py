@@ -125,7 +125,6 @@ class FeedMaker:
 
     def expand(self, item_prop):
         result = []
-        items =
         for piece in re.split(r'{(\w)+}', item_prop):
             m = re.match(r'{(\w)+}', piece)
             if m:
@@ -137,7 +136,7 @@ class FeedMaker:
         return ''.join(result)
 
 
-page = GetPage("https://yuan.ga").read()
-f = FeedMaker(page).extract('<h3 class="entry-title"><a href="{%}" rel="bookmark">{%}</a></h3>')
-print(f)
-
+if __name__ == '__main__':
+    page = GetPage("https://yuan.ga").read()
+    f = FeedMaker(page).extract('<h3 class="entry-title"><a href="{%}" rel="bookmark">{%}</a></h3>')
+    print(f)
