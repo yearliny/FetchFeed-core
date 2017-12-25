@@ -1,0 +1,115 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="{% static 'fetchfeed/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'fetchfeed/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'fetchfeed/css/prism.css' %}">
+    <title>FetchFeed - New feed</title>
+</head>
+<body>
+    <header role="banner">
+        <nav class="navbar navbar-expand-md navbar-dark bg-primary">
+            <a href="#" class="navbar-brand">FetchFeed</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#dropdown-menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="dropdown-menu">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item active"><a href="#" class="nav-link">首页</a></li>
+                    <li class="nav-item h-100 d-inline-block"><a href="#" class="nav-link">近期</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link">精选</a></li>
+                </ul>
+                <button class="btn btn-outline-light" type="button">登陆</button>
+            </div>
+        </nav>       
+    </header>
+    <main role="main" class="container">
+        <div class="row justify-content-md-center">
+            <div class="col-md-9 mt-3">
+                <h3 class="header">烧制一个新 Feed </h3>
+                <p class="text-muted">
+                    制作一个<code>Feed</code>需要几步？
+                    <ol class="text-muted">
+                        <li>输入网址，然后点击 GO！</li>
+                        <li>如果看到了</li>
+                    </ol>
+                </p>
+            </div>
+        </div>
+        <div class="row justify-content-md-center">
+            <div class="col-md-9">
+                <hr>
+                <form action="">
+                    <h4>第一步</h4>                  
+                    <div class="input-group">
+                        <input type="text" name="address" id="address" class="form-control" placeholder="http://example.com" >
+                        <span class="input-group-btn">
+                            <button type="button" class="btn btn-outline-primary" data-toggle="collapse" data-target="#page-html" aria-expanded="false">Go!</button>
+                        </span>       
+                    </div>
+                    <pre class="collapse language-html" id="page-html"><code></code></pre>
+                    <hr>
+                    <h4>第二步</h4>
+                    <div class="form-group">
+                        <label for="item-pattern">项目规则</label>
+                        <textarea type="text" class="form-control" name="item-pattern" id="item-pattern"></textarea>
+                    </div>
+                    <button class="btn btn-block btn-primary" data-toggle="collapse" data-target="#extract-result" aria-expanded="false">Extract</button>
+                    <pre class="border border-top-0 collapse" id="extract-result">
+                        <code></code>
+                    </pre>
+                    <div class="form-group">
+                        <label for="global-pattern">全局规则</label>
+                        <textarea type="text" name="global-pattern" class="form-control" id="global-pattern"></textarea>
+                    </div>
+                    <hr>
+                    <h4>第三步</h4>
+                    <div class="form-group">
+                        <label for="feed-title">Feed标题规则</label>
+                        <input type="text" class="form-control" name="feed-title" id="feed-title">
+                    </div>
+                    <div class="form-group">
+                        <label for="feed-link">Feed链接规则</label>
+                        <input type="text" class="form-control" name="feed-link" id="feed-link">
+                    </div>
+                    <div class="form-group">
+                        <label for="feed-content">Feed内容规则</label>
+                        <input type="text" class="form-control" name="feed-content" id="feed-content">
+                    </div>
+
+                </form>
+                </div>
+            </div>
+        </div>
+    </main>  
+    <footer class="stick-bottom mt-3">
+        <div class="container-fluid pt-4 pb-1 text-center bg-dark">
+            <p class="text-light">© 2017 Copyright: <a class="text-light" href="https://yuan.ga">yearliny</a> </p>
+        </div>
+    </footer>
+    <script src="{% static 'fetchfeed/js/jquery.min.js' %}"></script>
+    <script src="{% static 'fetchfeed/js/popper.min.js' %}"></script>
+    <script src="{% static 'fetchfeed/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'fetchfeed/js/prism.js' %}"></script>
+    <script>
+        <!--TODO :实现单击按钮展开，再次单击不缩回。-->
+        $('button[data-target="#page-html"]').click(function(){
+            var url = $("#address").val();
+            $.ajax({
+                url: '{% url 'api' meth='get' %}',
+                type: 'get',
+                data: {url:url},
+                <!--JSON格式中不能出现“-”横杠符号-->
+                success:function(data){
+                    $('#page-html>code').text(data.page_html);
+                    Prism.highlightAll();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
