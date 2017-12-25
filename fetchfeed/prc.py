@@ -39,8 +39,15 @@ class GetPage:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) /'
             'Chrome/62.0.3202.94 Safari/537.36'
         }
-        page_html = requests.get(self.url, headers=headers, timeout=8)
-        if not self.encoding:
+        try:
+            page_html = requests.get(self.url, headers=headers, timeout=8)
+        except requests.exceptions.HTTPError as e:
+            print('HTTP Error:', e)
+        except requests.exceptions.Timeout as e:
+            print('TimeOut:', e)
+        except requests.exceptions.ConnectionError as e:
+            print('Connection Error：', e)
+        if page_html and self.encoding:
             page_html.encoding = self.encoding
         return page_html.text
 
@@ -82,7 +89,7 @@ class FeedMaker:
         items = []
         pieces = [p for p in re.split(r'({[*%]})', pattern) if p]
         begin = 0
-        while begin < len(self.page) and len(items) != max_items:
+        while p and begin < len(self.page) and len(items) != max_items:
             keep = False
             item = []
             for p in pieces:
@@ -110,7 +117,7 @@ class FeedMaker:
         if not global_pattern:
             self.items.extend(self._parse(item_pattern))
         else:
-            items = self._parse(global_pattern, maxitems=1)
+            items = self._parse(global_pattern, max_items=1)
             if items and items[0]:
                 # items[0][0] 是经过全局过滤后的第一条信息
                 self.items.extend(self._parse(items[0][0], item_pattern))
@@ -138,6 +145,5 @@ class FeedMaker:
 
 
 if __name__ == '__main__':
-    page = GetPage("https://yuan.ga").read()
-    f = FeedMaker(page).extract('<h3 class="entry-title"><a href="{%}" rel="bookmark">{%}</a></h3>')
-    print(f)
+    page = GetPage("https://www.baidu.com").read()
+    print(page)
