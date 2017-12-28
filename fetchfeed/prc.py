@@ -36,52 +36,81 @@ class GetPage:
     def get_html(self):
         # 通过requests获得网页源码，并返回
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) /'
-            'Chrome/62.0.3202.94 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:57.0) Gecko/20100101 Firefox/57.0'
         }
+        result = {}
         try:
             page_html = requests.get(self.url, headers=headers, timeout=8)
+            if page_html and self.encoding:
+                page_html.encoding = self.encoding
+            result['code'] = 0
+            result['status'] = 'Effective URL is {}. ' \
+                               'Page loaded successfully (encoding: {})'.format(page_html.url, page_html.encoding)
+            result['response'] = page_html.text
         except requests.exceptions.HTTPError as e:
-            print('HTTP Error:', e)
+            result['code'] = 1
+            result['status'] = 'HTTP Error:' + str(e)
+            result['response'] = None
         except requests.exceptions.Timeout as e:
-            print('TimeOut:', e)
+            result['code'] = 1
+            result['status'] = 'TimeOut:' + str(e)
+            result['response'] = None
         except requests.exceptions.ConnectionError as e:
-            print('Connection Error：', e)
-        if page_html and self.encoding:
-            page_html.encoding = self.encoding
-        return page_html.text
+            result['code'] = 1
+            result['status'] = 'Connection Error:' + str(e)
+            result['response'] = None
+        except requests.exceptions.RequestException as e:
+            result['code'] = 1
+            result['status'] = 'OOps: Something Else:' + str(e)
+            result['response'] = None
+        return result
 
     def read(self, cache_time=4):
         # 先寻找url对应文件是否存在缓存并与当前时间相差小于4小时，否则就先请求网页并覆盖旧缓存，然后返回网页源码
         file_path = self._get_path()
+        result = {}
+        # 对应缓存文件是否存在
         if os.path.exists(file_path):
-            if time.time() - os.path.getmtime(file_path) > 60*60*cache_time:
-                page_html = self.get_html()
-                with open(file_path, 'w+') as html_file:
-                    html_file.write(page_html)
-            else:
-                with open(file_path, 'r') as html_file:
+            if not time.time() - os.path.getmtime(file_path) > 60*60*cache_time:
+                with open(file_path, 'r', encoding='utf-8') as html_file:
                     page_html = html_file.read()
-            return page_html
-        elif os.path.exists(os.path.dirname(file_path)):
-            page_html = self.get_html()
-            with open(file_path, 'w+') as html_file:
-                html_file.write(page_html)
-            return page_html
+                result['code'] = 0
+                result['status'] = 'Page loaded successfully by cache.'
+                result['response'] = page_html
+            # 缓存过期时，更新本地缓存并返回数据
+            else:
+                page_html = self.get_html()
+                result.update(page_html)
+                with open(file_path, 'w+', encoding='utf-8') as html_file:
+                    html_file.write(page_html['response'])
+        # 没有缓存文件时，先获取网页，检查目录是否存在，然后写入并返回数据
         else:
-            os.makedirs(os.path.dirname(file_path))
             page_html = self.get_html()
-            with open(file_path, "w+") as html_file:
-                html_file.write(page_html)
-            return page_html
+            result.update(page_html)
+            if page_html['code'] == 0:
+                # 如果目录存在，则直接创建文件
+                if os.path.exists(os.path.dirname(file_path)):
+                    with open(file_path, 'w+', encoding='utf-8') as html_file:
+                        html_file.write(page_html['response'])
+                # 目录不存在，先创建目录然后更新缓存
+                else:
+                    os.makedirs(os.path.dirname(file_path))
+                    page_html = self.get_html()
+                    with open(file_path, 'w+', encoding='utf-8') as html_file:
+                        html_file.write(page_html['response'])
+        return result
 
 
 class FeedMaker:
+    # TODO: 自定义错误基类，当P元素或规则不合法时抛出异常，下游函数直接捕获错误而无须多重嵌套条件判断
     """Main class for making feeds. Contains methods for setting
     parameters, input parsing, and feed generation."""
     def __init__(self, page_file):
-        self.items = []
-        self.page = page_file
+        self.page_file = page_file
+        if page_file['response']:
+            self.page = page_file['response']
+        self.code = page_file['code']
+        self.status = page_file['status']
 
     def _parse(self, pattern, max_items=-1):
         """Parse string according to pattern and return a list of items.
@@ -89,7 +118,7 @@ class FeedMaker:
         items = []
         pieces = [p for p in re.split(r'({[*%]})', pattern) if p]
         begin = 0
-        while p and begin < len(self.page) and len(items) != max_items:
+        while begin < len(self.page) and len(items) != max_items:
             keep = False
             item = []
             for p in pieces:
@@ -114,24 +143,44 @@ class FeedMaker:
         return items
 
     def extract(self, item_pattern,  global_pattern=None):
+        # 获取self.page、item_pattern、global_pattern对象，返回一个字典，字典包含响应码、消息、和提取内容
+        # 1.判断网页是否成功获取，获取失败则直接返回失败信息
+        # 2.判断是否有全局规则，有全局规则先进行全局规则过滤
+        # 3.判断 item_pattern 是否成功提取项目，若失败则报错。
+        result = {'code': 0}
+        if self.code != 0:
+            return self.page_file
         if not global_pattern:
-            self.items.extend(self._parse(item_pattern))
-        else:
-            items = self._parse(global_pattern, max_items=1)
-            if items and items[0]:
-                # items[0][0] 是经过全局过滤后的第一条信息
-                self.items.extend(self._parse(items[0][0], item_pattern))
+            items = self._parse(item_pattern)
+            if items:
+                result['status'] = 'OK ({} items found)'.format(len(items))
             else:
-                print("无法匹配到任何条目")
-        result = []
-        item_num = 1
-        for item in self.items:
-            current_item = {'item'+str(item_num): item}
-            item_num += 1
-            result.append(current_item)
+                result['code'] = 2002
+                result['status'] = 'Item pattern error.Please check the input and try again.'
+        else:
+            # 先进行全局规则过滤，然后进行条目规则过滤
+            global_flited = self._parse(global_pattern, max_items=1)
+            if global_flited and global_flited[0]:
+                # items[0][0] 是经过全局过滤后的第一条信息
+                items = self._parse(global_flited[0][0], item_pattern)
+                if items:
+                    result['status'] = 'OK ({} items found)'.format(len(items))
+                else:
+                    result['code'] = 2002
+                    result['status'] = 'Item pattern error.Please check the input and try again.'
+            else:
+                result['code'] = 2001
+                result['status'] = 'Global pattern error.Please check the input and try again.'
+        temp_response = []
+        for index, item in enumerate(items, start=1):
+            current_item = {'item'+str(index): item}
+            temp_response.append(current_item)
+        result['response'] = temp_response
         return result
 
     def expand(self, item_prop):
+        if self.code != 0:
+            return self.page_file
         result = []
         for piece in re.split(r'{(\w)+}', item_prop):
             m = re.match(r'{(\w)+}', piece)
@@ -145,5 +194,6 @@ class FeedMaker:
 
 
 if __name__ == '__main__':
-    page = GetPage("https://www.baidu.com").read()
-    print(page)
+    page = GetPage("https://yuan.ga").read()
+    print(FeedMaker(page).extract('<h3 class="entry-title"><a href="{%}" rel="bookmark">{%}</a></h3>'))
+
