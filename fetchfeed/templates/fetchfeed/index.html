@@ -48,10 +48,13 @@
                     <div class="input-group">
                         <input type="text" name="address" id="address" class="form-control" placeholder="http://example.com" >
                         <span class="input-group-btn">
-                            <button type="button" class="btn btn-outline-primary" data-toggle="collapse" data-target="#page-html" aria-expanded="false">Go!</button>
+                            <button type="button" class="btn btn-outline-primary" data-toggle="collapse" data-target="#page-html-response" aria-expanded="false">Go!</button>
                         </span>       
                     </div>
-                    <pre class="collapse language-html" id="page-html"><code></code></pre>
+                    <div class="bg-dark text-muted" id="page-html-status">
+                        <p class="mb-0"></p>
+                    </div>
+                    <pre class="collapse mt-0 language-html" id="page-html-response"><code></code></pre>
                     <hr>
                     <h4>第二步</h4>
                     <div class="form-group">
@@ -97,7 +100,7 @@
     <script src="{% static 'fetchfeed/js/prism.js' %}"></script>
     <script>
         <!--TODO :实现单击按钮展开，再次单击不缩回。-->
-        $('button[data-target="#page-html"]').click(function(){
+        $('button[data-target="#page-html-response"]').click(function(){
             var url = $("#address").val();
             $.ajax({
                 url: '{% url 'api' meth='get' %}',
@@ -105,7 +108,7 @@
                 data: {url:url},
                 <!--JSON格式中不能出现“-”横杠符号-->
                 success:function(data){
-                    $('#page-html>code').text(data.page_html);
+                    $('#page-html-response>code').text(data.status + '\n' + data.response);
                     Prism.highlightAll();
                 }
             });

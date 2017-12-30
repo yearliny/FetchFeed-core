@@ -115,8 +115,9 @@ class FeedMaker:
     def _parse(self, pattern, max_items=-1):
         """Parse string according to pattern and return a list of items.
         Parsing stops when maxitems > 0 are found."""
-        items = []
         pieces = [p for p in re.split(r'({[*%]})', pattern) if p]
+        assert pieces, 'There is no {%} in patterns.Please check the input and try again.'
+        items = []
         begin = 0
         while begin < len(self.page) and len(items) != max_items:
             keep = False
@@ -140,6 +141,7 @@ class FeedMaker:
             if not item:
                 break
             items.append(item)
+        assert items, 'Can not find any item, please check the input and try again'
         return items
 
     def extract(self, item_pattern,  global_pattern=None):
@@ -147,50 +149,27 @@ class FeedMaker:
         # 1.判断网页是否成功获取，获取失败则直接返回失败信息
         # 2.判断是否有全局规则，有全局规则先进行全局规则过滤
         # 3.判断 item_pattern 是否成功提取项目，若失败则报错。
-        result = {'code': 0}
+        result = {'code': 0, 'response': {}}
         if self.code != 0:
             return self.page_file
-        if not global_pattern:
-            items = self._parse(item_pattern)
-            if items:
-                result['status'] = 'OK ({} items found)'.format(len(items))
+        try:
+            if not global_pattern:
+                items = self._parse(item_pattern)
             else:
-                result['code'] = 2002
-                result['status'] = 'Item pattern error.Please check the input and try again.'
-        else:
-            # 先进行全局规则过滤，然后进行条目规则过滤
-            global_flited = self._parse(global_pattern, max_items=1)
-            if global_flited and global_flited[0]:
-                # items[0][0] 是经过全局过滤后的第一条信息
-                items = self._parse(global_flited[0][0], item_pattern)
-                if items:
-                    result['status'] = 'OK ({} items found)'.format(len(items))
-                else:
-                    result['code'] = 2002
-                    result['status'] = 'Item pattern error.Please check the input and try again.'
-            else:
-                result['code'] = 2001
-                result['status'] = 'Global pattern error.Please check the input and try again.'
-        temp_response = []
+                # 先进行全局规则过滤，然后进行条目规则过滤
+                items = self._parse(global_pattern, max_items=1)
+                if items and items[0]:
+                    # items[0][0] 是经过全局过滤后的第一条信息
+                    items = self._parse(items[0][0], item_pattern)
+            result['status'] = 'OK ({} items found)'.format(len(items))
+        except AssertionError as e:
+            result['code'] = 1
+            result['status'] = e
+
         for index, item in enumerate(items, start=1):
             current_item = {'item'+str(index): item}
-            temp_response.append(current_item)
-        result['response'] = temp_response
+            result['response'].update(current_item)
         return result
-
-    def expand(self, item_prop):
-        if self.code != 0:
-            return self.page_file
-        result = []
-        for piece in re.split(r'{(\w)+}', item_prop):
-            m = re.match(r'{(\w)+}', piece)
-            if m:
-                m = int(m.group(1)) - 1
-                for i in self.items:
-                    result.append(i[m])
-            else:
-                result.append(piece)
-        return ''.join(result)
 
 
 if __name__ == '__main__':

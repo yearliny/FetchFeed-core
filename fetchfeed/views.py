@@ -11,8 +11,5 @@ def api(request, meth):
     if meth == 'get':
         url = request.GET.get('url')
         page_html = prc.GetPage(url).read()
-        response = {
-            'page_html': page_html
-        }
-    return JsonResponse(response)
+    return JsonResponse(page_html)
 
